@@ -16,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+//todo service tests
 @AutoConfigureMockMvc
 @SpringBootTest
 public class VolunteerServiceTest extends BaseIntegrationTest {

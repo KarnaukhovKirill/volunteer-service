@@ -20,14 +20,14 @@ public class VolunteerController {
     @ResponseStatus(code = HttpStatus.CREATED)
     public VolunteerInfo create(@RequestBody @Valid CreateVolunteerRequest request) {
         log.info("input request: {} ", request);
-        //service.create(request);
+        //todo service.create(request);
         return new VolunteerInfo(1);
     }
 
     @GetMapping("/me")
     public VolunteerInfo get(@RequestHeader(USER_HEADER) String username) {
         log.info("input username {}", username);
-        //service.get(username);
+        //todo service.get(username);
         return new VolunteerInfo(1);
     }
 
@@ -41,28 +41,28 @@ public class VolunteerController {
     @PatchMapping("/me")
     public VolunteerInfo patch(@RequestHeader(USER_HEADER) String username, @RequestBody @Valid UpdateVolunteerRequest request) {
         log.info("input username {}", username);
-        //service.update(username, request);
+        //todo service.update(username, request);
         return new VolunteerInfo(1);
     }
 
     @PostMapping("/me/incident/act")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void proveAction(@RequestBody @Valid ProveVolunteer proveVolunteer) {
-        //service.proveAction(proveVolunteer);
+        //todo service.proveAction(proveVolunteer);
         log.info("input proveVolunteer {}", proveVolunteer);
     }
 
     @GetMapping("/{id}")
     public VolunteerInfo get(@PathVariable("id") @Positive(message = "id должен быть > 0.") Long id) {
         log.info("input id {}", id);
-        //service.get(id);
+        //todo service.get(id);
         return new VolunteerInfo(1);
     }
 
     @PostMapping("/list")
     public VolunteerInfosResponse list(@RequestBody @Valid VolunteerListRequest request) {
         log.info("input request {}", request);
-        //service.get(request);
+        //todo service.get(request);
         return new VolunteerInfosResponse(List.of(new VolunteerInfo(1)));
     }
 }
