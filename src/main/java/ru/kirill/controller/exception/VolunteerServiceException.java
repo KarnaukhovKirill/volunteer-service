@@ -1,4 +1,4 @@
-package ru.kirill.controller;
+package ru.kirill.controller.exception;
 
 import org.springframework.http.HttpStatus;
 

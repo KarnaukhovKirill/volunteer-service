@@ -1,8 +1,9 @@
-package ru.kirill.controller;
+package ru.kirill.controller.internal;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.kirill.controller.dto.ContactsVolunteerResponse;
+import ru.kirill.controller.dto.VolunteerContact;
 
 import java.util.List;
 

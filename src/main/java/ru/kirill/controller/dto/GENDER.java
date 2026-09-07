@@ -1,7 +1,4 @@
-package ru.kirill.controller;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import org.springframework.http.HttpStatus;
+package ru.kirill.controller.dto;
 
 public enum GENDER {
     MALE,FEMALE;

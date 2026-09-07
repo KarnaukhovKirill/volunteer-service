@@ -1,4 +1,4 @@
-package ru.kirill.controller;
+package ru.kirill.controller.dto;
 
 import lombok.Builder;
 import lombok.Data;

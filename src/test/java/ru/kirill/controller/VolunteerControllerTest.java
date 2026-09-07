@@ -2,19 +2,19 @@ package ru.kirill.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import ru.kirill.Base;
+import ru.kirill.BaseIntegrationTest;
+import ru.kirill.controller.dto.*;
+import ru.kirill.controller.external.VolunteerController;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@AutoConfigureMockMvc
-@SpringBootTest
-class VolunteerControllerTest {
+class VolunteerControllerTest extends BaseIntegrationTest {
 
     public static final String BASE_URL = "/api/v1/volunteer/";
     @Autowired
@@ -79,7 +79,7 @@ class VolunteerControllerTest {
     public void testGetVolunteer_response_success() {
         webTestClient.get()
                 .uri(BASE_URL + "me")
-                .header(VolunteerController.USER_HEADER, "Username")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -94,7 +94,7 @@ class VolunteerControllerTest {
     public void testDeleteVolunteer_response_success() {
         webTestClient.delete()
                 .uri(BASE_URL + "me")
-                .header(VolunteerController.USER_HEADER, "Username")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -103,7 +103,9 @@ class VolunteerControllerTest {
     public void testPatchVolunteer_response_success() {
         webTestClient.patch()
                 .uri(BASE_URL + "me")
-                .header(VolunteerController.USER_HEADER, "Username")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(UpdateVolunteerRequest.builder().city("Piter").restrict("Vaska").lastName("Petrov").email("petrov@gmail.com").phone("+7778882354").build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -164,7 +166,7 @@ class VolunteerControllerTest {
                 .uri(BASE_URL + "/me/incident/act")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ProveVolunteer.builder().incNumber(1).action(ACTION.PROVE).build())
-                .header(VolunteerController.USER_HEADER, "Username")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -175,7 +177,7 @@ class VolunteerControllerTest {
                 .uri(BASE_URL + "/me/incident/act")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ProveVolunteer.builder().incNumber(1).build())
-                .header(VolunteerController.USER_HEADER, "Username")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .exchange()
                 .expectStatus().is4xxClientError();
     }
