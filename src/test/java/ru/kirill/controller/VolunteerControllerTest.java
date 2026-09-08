@@ -38,7 +38,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 )
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(VolunteerInfo.class)
+                .expectBody(VolunteerInfoDto.class)
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getId()).isGreaterThanOrEqualTo(0);
@@ -83,12 +83,14 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(VolunteerInfo.class)
+                .expectBody(VolunteerInfoDto.class)
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getId()).isGreaterThanOrEqualTo(0);
                 });
     }
+
+    //todo create test when db dont have user (catch exception)
 
     @Test
     public void testDeleteVolunteer_response_success() {
@@ -105,11 +107,11 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .uri(BASE_URL + "me")
                 .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(UpdateVolunteerRequest.builder().city("Piter").restrict("Vaska").lastName("Petrov").email("petrov@gmail.com").phone("+7778882354").build())
+                .bodyValue(UpdateVolunteerRequest.builder().city("Piter").restrict("Vaska").lastName("Petrov").email("petrov@gmail.com").phoneNumber("+7778882354").build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(VolunteerInfo.class)
+                .expectBody(VolunteerInfoDto.class)
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getId()).isGreaterThanOrEqualTo(0);
@@ -139,7 +141,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(VolunteerInfo.class)
+                .expectBody(VolunteerInfoDto.class)
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getId()).isGreaterThanOrEqualTo(0);
@@ -157,7 +159,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody(ContactsVolunteerResponse.class)
                 .value(response ->
-                        assertThat(response.getVolunteerContacts().size()).isEqualTo(1));
+                        assertThat(response.getContactInfoDtos().size()).isEqualTo(1));
     }
 
     @Test

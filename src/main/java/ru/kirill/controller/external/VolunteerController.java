@@ -18,17 +18,17 @@ public class VolunteerController {
 
     @PostMapping("/register/me")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public VolunteerInfo create(@RequestBody @Valid CreateVolunteerRequest request) {
+    public VolunteerInfoDto create(@RequestBody @Valid CreateVolunteerRequest request) {
         log.info("input request: {} ", request);
         //todo service.create(request);
-        return new VolunteerInfo(1);
+        return new VolunteerInfoDto(1);
     }
 
     @GetMapping("/me")
-    public VolunteerInfo get(@RequestHeader(USER_HEADER) String username) {
+    public VolunteerInfoDto get(@RequestHeader(USER_HEADER) String username) {
         log.info("input username {}", username);
         //todo service.get(username);
-        return new VolunteerInfo(1);
+        return new VolunteerInfoDto(1);
     }
 
     @DeleteMapping("/me")
@@ -39,10 +39,10 @@ public class VolunteerController {
     }
 
     @PatchMapping("/me")
-    public VolunteerInfo patch(@RequestHeader(USER_HEADER) String username, @RequestBody @Valid UpdateVolunteerRequest request) {
+    public VolunteerInfoDto patch(@RequestHeader(USER_HEADER) String username, @RequestBody @Valid UpdateVolunteerRequest request) {
         log.info("input username {}", username);
         //todo service.update(username, request);
-        return new VolunteerInfo(1);
+        return new VolunteerInfoDto(1);
     }
 
     @PostMapping("/me/incident/act")
@@ -53,16 +53,16 @@ public class VolunteerController {
     }
 
     @GetMapping("/{id}")
-    public VolunteerInfo get(@PathVariable("id") @Positive(message = "id должен быть > 0.") Long id) {
+    public VolunteerInfoDto get(@PathVariable("id") @Positive(message = "id должен быть > 0.") Long id) {
         log.info("input id {}", id);
         //todo service.get(id);
-        return new VolunteerInfo(1);
+        return new VolunteerInfoDto(1);
     }
 
     @PostMapping("/list")
     public VolunteerInfosResponse list(@RequestBody @Valid VolunteerListRequest request) {
         log.info("input request {}", request);
         //todo service.get(request);
-        return new VolunteerInfosResponse(List.of(new VolunteerInfo(1)));
+        return new VolunteerInfosResponse(List.of(new VolunteerInfoDto(1)));
     }
 }

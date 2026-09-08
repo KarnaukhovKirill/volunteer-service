@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class ContactsVolunteerResponse {
-    private final List<VolunteerContact> volunteerContacts;
+    private final List<ContactInfoDto> contactInfoDtos;
 }
