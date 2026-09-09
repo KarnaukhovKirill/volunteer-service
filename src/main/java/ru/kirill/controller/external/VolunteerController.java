@@ -6,63 +6,62 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.kirill.controller.dto.*;
-
-import java.util.List;
+import ru.kirill.service.VolunteerService;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/volunteer")
 public class VolunteerController {
+    public static final String USER_HEADER = "X-USER-ID";
 
-    public static final String USER_HEADER = "X-USER_ID";
+    private final VolunteerService volunteerService;
+
+    public VolunteerController(VolunteerService volunteerService) {
+        this.volunteerService = volunteerService;
+    }
 
     @PostMapping("/register/me")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public VolunteerInfoDto create(@RequestBody @Valid CreateVolunteerRequest request) {
+    public VolunteerInfoDto create(@RequestBody @Valid CreateVolunteerRequest request, @RequestHeader(USER_HEADER) String userId) {
         log.info("input request: {} ", request);
-        //todo service.create(request);
-        return new VolunteerInfoDto(1);
+        return volunteerService.create(request, userId);
     }
 
     @GetMapping("/me")
-    public VolunteerInfoDto get(@RequestHeader(USER_HEADER) String username) {
-        log.info("input username {}", username);
-        //todo service.get(username);
-        return new VolunteerInfoDto(1);
+    public VolunteerInfoDto get(@RequestHeader(USER_HEADER) String userId) {
+        log.info("input userId {}", userId);
+        return volunteerService.get(userId);
     }
 
     @DeleteMapping("/me")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void delete(@RequestHeader(USER_HEADER) String username) {
-        log.info("input username {}", username);
-        //todo add service.delete(username);
+    public void delete(@RequestHeader(USER_HEADER) String userId) {
+        log.info("input userId {}", userId);
+        volunteerService.delete(userId);
     }
 
     @PatchMapping("/me")
-    public VolunteerInfoDto patch(@RequestHeader(USER_HEADER) String username, @RequestBody @Valid UpdateVolunteerRequest request) {
-        log.info("input username {}", username);
-        //todo service.update(username, request);
-        return new VolunteerInfoDto(1);
+    public VolunteerInfoDto patch(@RequestHeader(USER_HEADER) String userId, @RequestBody @Valid UpdateVolunteerRequest request) {
+        log.info("input userId {}", userId);
+        return volunteerService.update(userId, request);
     }
 
     @PostMapping("/me/incident/act")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void proveAction(@RequestBody @Valid ProveVolunteer proveVolunteer) {
-        //todo service.proveAction(proveVolunteer);
+    public void proveAction(@RequestBody @Valid ProveVolunteer proveVolunteer, @RequestHeader(USER_HEADER) String userId) {
         log.info("input proveVolunteer {}", proveVolunteer);
+        volunteerService.proveAction(proveVolunteer, userId);
     }
 
     @GetMapping("/{id}")
     public VolunteerInfoDto get(@PathVariable("id") @Positive(message = "id должен быть > 0.") Long id) {
         log.info("input id {}", id);
-        //todo service.get(id);
-        return new VolunteerInfoDto(1);
+        return volunteerService.get(id);
     }
 
     @PostMapping("/list")
     public VolunteerInfosResponse list(@RequestBody @Valid VolunteerListRequest request) {
         log.info("input request {}", request);
-        //todo service.get(request);
-        return new VolunteerInfosResponse(List.of(new VolunteerInfoDto(1)));
+        return volunteerService.get(request);
     }
 }

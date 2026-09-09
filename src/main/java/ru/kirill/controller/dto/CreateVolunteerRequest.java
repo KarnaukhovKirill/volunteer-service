@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -15,8 +16,10 @@ public class CreateVolunteerRequest {
     private final String fio;
     @NotNull(message = "Пол не должен быть null")
     private final GENDER gender;
+    @ToString.Exclude
     @NotBlank(message = "Номер телефона не должен быть пустым")
     private final String phoneNumber;
+    @ToString.Exclude
     @NotBlank(message = "email не должен быть пустым")
     private final String email;
     @NotNull(message = "Дата рождения не должна быть пустой")

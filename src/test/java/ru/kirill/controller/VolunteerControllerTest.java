@@ -24,6 +24,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     public void testCreateVolunteer_response_is201() {
         webTestClient.post()
                 .uri(BASE_URL + "register/me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(CreateVolunteerRequest.builder()
@@ -49,6 +50,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     public void testCreateVolunteer_response_is4xx() {
         webTestClient.post()
                 .uri(BASE_URL + "register/me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(CreateVolunteerRequest.builder().fio(null).build())
@@ -60,6 +62,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     public void testCreateVolunteer_response_isConflict() {
         webTestClient.post()
                 .uri(BASE_URL + "register/me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(CreateVolunteerRequest.builder()
@@ -121,7 +124,8 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     @Test
     public void testPostListVolunteer_response_success() {
         webTestClient.post()
-                .uri(BASE_URL + "/list")
+                .uri(BASE_URL + "list")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(VolunteerListRequest.builder().city("Moscow").status(STATUS.AVAILABLE).build())

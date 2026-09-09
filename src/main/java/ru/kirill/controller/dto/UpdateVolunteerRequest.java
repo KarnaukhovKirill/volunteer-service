@@ -3,6 +3,7 @@ package ru.kirill.controller.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Builder
@@ -10,8 +11,10 @@ import lombok.Data;
 public class UpdateVolunteerRequest {
     @NotNullOrNotBlank(message = "Фамилия не должна быть пустой")
     private final String lastName;
+    @ToString.Exclude
     @NotNullOrNotBlank(message = "Номер телефона не должен быть пустым")
     private final String phoneNumber;
+    @ToString.Exclude
     @NotNullOrNotBlank(message = "email не должен быть пустым")
     private final String email;
     @NotNullOrNotBlank(message = "Город проживания не должен быть пустым")
