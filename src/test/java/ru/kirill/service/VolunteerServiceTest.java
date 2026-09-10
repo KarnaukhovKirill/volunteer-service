@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-@AutoConfigureMockMvc
-@SpringBootTest
 public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Autowired
@@ -49,12 +47,17 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
+//        when(volunteerRepository.create())
         VolunteerInfoDto volunteerInfoDto = volunteerService.create(request, "Stepanov01");
         assertThat(volunteerInfoDto.getId()).isGreaterThanOrEqualTo(0);
     }
 
     public void createTest_conflict() {
-        //todo test when already volunteer exists
+        when(volunteerRepository.findByName(Base.NOT_EXIST_USERNAME)).thenThrow(new VolunteerServiceException("Пользователя с таким именем не существует", HttpStatus.BAD_REQUEST));
+        assertThrows(
+                VolunteerServiceException.class,
+                () -> volunteerService.get(Base.NOT_EXIST_USERNAME)
+        );
     }
 
     @Test

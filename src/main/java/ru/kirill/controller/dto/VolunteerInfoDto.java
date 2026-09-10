@@ -1,5 +1,6 @@
 package ru.kirill.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VolunteerInfoDto {
     private final long id;
     private final String user_id;

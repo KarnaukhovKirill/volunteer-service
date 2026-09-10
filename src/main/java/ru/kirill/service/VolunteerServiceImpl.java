@@ -1,6 +1,7 @@
 package ru.kirill.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
@@ -13,22 +14,24 @@ import java.util.Optional;
 @Service
 public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerRepository volunteerRepository;
+    private final VolunteerMapper mapper;
 
-    public VolunteerServiceImpl(VolunteerRepository volunteerRepository) {
+    public VolunteerServiceImpl(VolunteerRepository volunteerRepository, VolunteerMapper mapper) {
         this.volunteerRepository = volunteerRepository;
+        this.mapper = mapper;
     }
 
     @Override
     public VolunteerInfoDto create(CreateVolunteerRequest request, String userId) {
-//        VolunteerInfo volunteerInfo = request.toDomain();
+        VolunteerInfo volunteerInfo = mapper.toDomain(request);
 //        try {
-//            volunteerRepository.create(volunteerInfo);
+            VolunteerInfo volunteerI = volunteerRepository.create(volunteerInfo);
+            return mapper.toDto(volunteerI);
 //        } catch (DataIntegrityViolationException e) {
-//            log.error("Item with this {} name already exists", );
-//            throw new VolunteerServiceException()
+//            String errorText = String.format("Item with this userId %s already exists", userId);
+//            log.error(errorText);
+//            throw new VolunteerServiceException(errorText, HttpStatus.CONFLICT)
 //        }
-//        return volunteerRepository.create(volunteerInfo);
-        return null;
     }
 
     @Override

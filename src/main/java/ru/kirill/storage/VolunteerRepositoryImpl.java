@@ -14,7 +14,12 @@ public class VolunteerRepositoryImpl implements VolunteerRepository {
     }
 
     @Override
-    public VolunteerInfoDto get(VolunteerListRequest request) {
+    public VolunteerInfo get(VolunteerListRequest request) {
+        return null;
+    }
+
+    @Override
+    public VolunteerInfo create(VolunteerInfo volunteerInfo) {
         return null;
     }
 }
