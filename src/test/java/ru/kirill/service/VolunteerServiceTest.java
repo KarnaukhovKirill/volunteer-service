@@ -2,8 +2,6 @@ package ru.kirill.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.kirill.Base;
@@ -15,11 +13,14 @@ import ru.kirill.storage.VolunteerRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 public class VolunteerServiceTest extends BaseIntegrationTest {
@@ -47,22 +48,37 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
-//        when(volunteerRepository.create())
-        VolunteerInfoDto volunteerInfoDto = volunteerService.create(request, "Stepanov01");
+        when(volunteerRepository.create(any(VolunteerInfo.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        VolunteerInfoDto volunteerInfoDto = volunteerService.create(request, Base.STEPANOV01);
         assertThat(volunteerInfoDto.getId()).isGreaterThanOrEqualTo(0);
+        assertThat(volunteerInfoDto.getStatus()).isEqualTo(STATUS.AVAILABLE);
+        assertThat(volunteerInfoDto.getFirstName()).isEqualTo("Владимир");
+        assertThat(volunteerInfoDto.getLastName()).isEqualTo("Степанов");
+        assertThat(volunteerInfoDto.getMiddleName()).isEqualTo("Сергеевич");
+        assertThat(volunteerInfoDto.getUserId()).isEqualTo(Base.STEPANOV01);
     }
 
+    @Test
     public void createTest_conflict() {
-        when(volunteerRepository.findByName(Base.NOT_EXIST_USERNAME)).thenThrow(new VolunteerServiceException("Пользователя с таким именем не существует", HttpStatus.BAD_REQUEST));
+        CreateVolunteerRequest request = CreateVolunteerRequest.builder()
+                .fio("Степанов Владимир Сергеевич")
+                .phoneNumber("79061233564")
+                .gender(GENDER.MALE)
+                .email("yaVladimir@mail.com")
+                .birthday(LocalDate.of(1999, 2, 20))
+                .city("Moscow")
+                .build();
+        when(volunteerRepository.create(any(VolunteerInfo.class))).thenThrow(new VolunteerServiceException("Пользователь с таким именем уже существует", HttpStatus.BAD_REQUEST));
         assertThrows(
                 VolunteerServiceException.class,
-                () -> volunteerService.get(Base.NOT_EXIST_USERNAME)
+                () -> volunteerService.create(request, Base.STEPANOV01)
         );
     }
 
     @Test
     public void getTest_success_notFoundVolunteer() {
-        when(volunteerRepository.findByName(Base.NOT_EXIST_USERNAME)).thenThrow(new VolunteerServiceException("Пользователя с таким именем не существует", HttpStatus.BAD_REQUEST));
+        when(volunteerRepository.findByName(Base.NOT_EXIST_USERNAME)).thenThrow(new VolunteerServiceException("Пользователя с таким именем не существует", HttpStatus.NOT_FOUND));
         assertThrows(
                 VolunteerServiceException.class,
                 () -> volunteerService.get(Base.NOT_EXIST_USERNAME)
@@ -85,17 +101,18 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Test
     public void updateTest_success() {
+        UUID uuid = UUID.randomUUID();
         when(volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE))
-                .thenReturn(Optional.of(VolunteerInfo.builder().firstName("Пётр").lastName("Васюков").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
-
+                .thenReturn(Optional.of(VolunteerInfo.builder().id(uuid).firstName("Пётр").lastName("Васюков").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
+        when(volunteerRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(VolunteerInfo.builder().firstName("Пётр").lastName("Васюткин").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
+        when(volunteerRepository.update(any(), any(UpdateVolunteerRequest.class))).thenReturn(uuid);
         Optional<VolunteerInfo> volunteer = volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE);
         assertEquals("Васюков", volunteer.get().getLastName());
 
         UpdateVolunteerRequest updateRequest = UpdateVolunteerRequest.builder().lastName("Васюткин").build();
         VolunteerInfoDto updated = volunteerService.update(Base.USERNAME_FOR_UPDATE, updateRequest);
 
-        when(volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE))
-                .thenReturn(Optional.of(VolunteerInfo.builder().firstName("Пётр").lastName("Васюткин").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
         assertEquals("Васюткин", updated.getLastName());
     }
 
@@ -119,14 +136,26 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Test
     public void getByRequest_success() {
-
         VolunteerListRequest request = VolunteerListRequest.builder().city("Moscow").status(STATUS.AVAILABLE).build();
 
-        when(volunteerRepository.get(request)).thenReturn(VolunteerInfoDto.builder().id(1003L).build());
+        when(volunteerRepository.get(request))
+                .thenReturn(List.of(VolunteerInfo.builder().firstName("FIRST").build()));
 
         VolunteerInfosResponse response = volunteerService.get(request);
 
-        assertEquals(1003L, response.getVolunteers().get(0).getId());
+        assertEquals(1, response.getVolunteers().size());
+        assertEquals("FIRST", response.getVolunteers().get(0).getFirstName());
+    }
 
+    @Test
+    public void getByRequest_success_noFiltersProvided() {
+        VolunteerListRequest request = VolunteerListRequest.builder().build();
+
+        when(volunteerRepository.get(request))
+                .thenReturn(List.of(VolunteerInfo.builder().firstName("FIRST").build()));
+
+        VolunteerInfosResponse response = volunteerService.get(request);
+
+        assertEquals(1, response.getVolunteers().size());
     }
 }

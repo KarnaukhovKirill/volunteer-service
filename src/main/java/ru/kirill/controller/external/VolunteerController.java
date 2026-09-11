@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.kirill.controller.dto.*;
 import ru.kirill.service.VolunteerService;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/volunteer")
@@ -54,7 +56,7 @@ public class VolunteerController {
     }
 
     @GetMapping("/{id}")
-    public VolunteerInfoDto get(@PathVariable("id") @Positive(message = "id должен быть > 0.") Long id) {
+    public VolunteerInfoDto get(@PathVariable("id") @Positive(message = "id должен быть > 0.") UUID id) {
         log.info("input id {}", id);
         return volunteerService.get(id);
     }

@@ -7,43 +7,27 @@ import ru.kirill.controller.dto.CreateVolunteerRequest;
 import ru.kirill.controller.dto.VolunteerInfoDto;
 import ru.kirill.storage.VolunteerInfo;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 //todo do mapping
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR,
+        imports = LocalDateTime.class, uses = FioParser.class)
 public interface VolunteerMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "")
     VolunteerInfoDto toDto(VolunteerInfo volunteerI);
 
+    List<VolunteerInfoDto> toDto(List<VolunteerInfo> volunteers);
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "status", constant = "AVAILABLE")
     @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "firstName", expression = "java(extractFirstName(request.getFio()))")
-    @Mapping(target = "lastName", expression = "java(extractLastName(request.getFio()))")
-    @Mapping(target = "middleName", expression = "java(extractMiddleName(request.getFio()))")
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "createDate", expression = "java(LocalDateTime.now())")
+    @Mapping(target = "currentIncidentId", ignore = true)
+    @Mapping(target = "firstName", source = "fio", qualifiedByName = "extractFirstName")
+    @Mapping(target = "lastName", source = "fio", qualifiedByName = "extractLastName")
+    @Mapping(target = "middleName", source = "fio", qualifiedByName = "extractMiddleName")
     VolunteerInfo toDomain(CreateVolunteerRequest request);
-
-    default String extractFirstName(String fio) {
-        if (fio == null || fio.trim().isEmpty()) {
-            return null;
-        }
-        String[] parts = fio.trim().split("\\s+");
-        return parts.length >= 3 ? parts[1] : null;
-    }
-
-    default String extractLastName(String fio) {
-        if (fio == null || fio.trim().isEmpty()) {
-            return null;
-        }
-        String[] parts = fio.trim().split("\\s+");
-        return parts.length >= 3 ? parts[0] : null;
-    }
-
-    default String extractMiddleName(String fio) {
-        if (fio == null || fio.trim().isEmpty()) {
-            return null;
-        }
-        String[] parts = fio.trim().split("\\s+");
-        return parts.length >= 3 ? parts[2] : null;
-    }
 }

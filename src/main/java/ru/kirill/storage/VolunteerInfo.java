@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class VolunteerInfo {
     private final UUID id;
     private final String userId;
@@ -24,7 +24,7 @@ public class VolunteerInfo {
 
     public static VolunteerInfoDto toDto(VolunteerInfo volunteerInfo) {
         return VolunteerInfoDto.builder()
-                .user_id(volunteerInfo.userId)
+                .userId(volunteerInfo.userId)
                 .firstName(volunteerInfo.firstName)
                 .middleName(volunteerInfo.middleName)
                 .createDate(volunteerInfo.createDate)

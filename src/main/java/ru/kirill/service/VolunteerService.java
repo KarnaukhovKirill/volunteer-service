@@ -2,6 +2,8 @@ package ru.kirill.service;
 
 import ru.kirill.controller.dto.*;
 
+import java.util.UUID;
+
 public interface VolunteerService {
 
     VolunteerInfoDto create(CreateVolunteerRequest request, String userId);
@@ -16,5 +18,5 @@ public interface VolunteerService {
 
     VolunteerInfosResponse get(VolunteerListRequest request);
 
-    VolunteerInfoDto get(long id);
+    VolunteerInfoDto get(UUID id);
 }

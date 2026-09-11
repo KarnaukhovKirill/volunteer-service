@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VolunteerInfoDto {
     private final long id;
-    private final String user_id;
+    private final String userId;
     private final String firstName;
     private final String lastName;
     private final String middleName;

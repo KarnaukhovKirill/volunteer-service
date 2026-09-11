@@ -1,9 +1,14 @@
 package ru.kirill.controller.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-public class VolunteerServiceException extends Throwable {
-    public VolunteerServiceException(String msg, HttpStatus httpStatus) {
+@Getter
+public class VolunteerServiceException extends RuntimeException {
+    private final HttpStatus status;
 
+    public VolunteerServiceException(String msg, HttpStatus httpStatus) {
+        super(msg);
+        this.status = httpStatus;
     }
 }

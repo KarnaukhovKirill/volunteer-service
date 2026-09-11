@@ -8,7 +8,9 @@ import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.storage.VolunteerInfo;
 import ru.kirill.storage.VolunteerRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -23,10 +25,12 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public VolunteerInfoDto create(CreateVolunteerRequest request, String userId) {
-        VolunteerInfo volunteerInfo = mapper.toDomain(request);
+        VolunteerInfo volunteerInfo = mapper.toDomain(request).toBuilder()
+                .userId(userId)
+                .build();
 //        try {
-            VolunteerInfo volunteerI = volunteerRepository.create(volunteerInfo);
-            return mapper.toDto(volunteerI);
+        VolunteerInfo volunteerI = volunteerRepository.create(volunteerInfo);
+        return mapper.toDto(volunteerI);
 //        } catch (DataIntegrityViolationException e) {
 //            String errorText = String.format("Item with this userId %s already exists", userId);
 //            log.error(errorText);
@@ -36,21 +40,24 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public VolunteerInfoDto get(String username) {
-        Optional<VolunteerInfo> volunteerOptional = volunteerRepository.findByName(username);
-        if (volunteerOptional.isPresent()) {
-            return VolunteerInfo.toDto(volunteerOptional.get());
-        }
-        return VolunteerInfoDto.builder().build();
+        return volunteerRepository.findByName(username)
+                .map(mapper::toDto)
+                .orElseThrow(() -> {
+                            String msg = String.format("Volunteer with name = %s not found", username);
+                            return new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
+                        }
+                );
     }
 
     @Override
     public void delete(String username) {
-
+        volunteerRepository.delete(username);
     }
 
     @Override
     public VolunteerInfoDto update(String userId, UpdateVolunteerRequest request) {
-        return null;
+        UUID id = volunteerRepository.update(userId, request);
+        return get(id);
     }
 
     @Override
@@ -60,11 +67,18 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public VolunteerInfosResponse get(VolunteerListRequest request) {
-        return null;
+        List<VolunteerInfo> volunteers = volunteerRepository.get(request);
+        return new VolunteerInfosResponse(mapper.toDto(volunteers));
     }
 
     @Override
-    public VolunteerInfoDto get(long id) {
-        return null;
+    public VolunteerInfoDto get(UUID id) {
+        return volunteerRepository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> {
+                            String msg = String.format("Volunteer with id = %d not found", id);
+                            return new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
+                        }
+                );
     }
 }
