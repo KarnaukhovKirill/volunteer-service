@@ -8,7 +8,7 @@ import ru.kirill.Base;
 import ru.kirill.BaseIntegrationTest;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
-import ru.kirill.storage.VolunteerInfo;
+import ru.kirill.storage.Volunteer;
 import ru.kirill.storage.VolunteerRepository;
 
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Test
     public void findByName_success() {
-        VolunteerInfo volunteerInfo = VolunteerInfo.builder().firstName("Username1").build();
+        Volunteer volunteerInfo = Volunteer.builder().firstName("Username1").build();
         when(volunteerRepository.findByName(Base.USERNAME)).thenReturn(Optional.of(volunteerInfo));
         var volunteer = volunteerService.get(Base.USERNAME);
         assertEquals("Username1", volunteer.getFirstName());
@@ -48,7 +48,7 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
-        when(volunteerRepository.create(any(VolunteerInfo.class)))
+        when(volunteerRepository.create(any(Volunteer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         VolunteerInfoDto volunteerInfoDto = volunteerService.create(request, Base.STEPANOV01);
         assertThat(volunteerInfoDto.getId()).isGreaterThanOrEqualTo(0);
@@ -69,7 +69,7 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
-        when(volunteerRepository.create(any(VolunteerInfo.class))).thenThrow(new VolunteerServiceException("Пользователь с таким именем уже существует", HttpStatus.BAD_REQUEST));
+        when(volunteerRepository.create(any(Volunteer.class))).thenThrow(new VolunteerServiceException("Пользователь с таким именем уже существует", HttpStatus.BAD_REQUEST));
         assertThrows(
                 VolunteerServiceException.class,
                 () -> volunteerService.create(request, Base.STEPANOV01)
@@ -87,15 +87,15 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Test
     public void deleteTest_success() {
-        VolunteerInfo volunteerInfo = VolunteerInfo.builder().firstName(Base.USER_FOR_DELETE_TEST).build();
+        Volunteer volunteerInfo = Volunteer.builder().firstName(Base.USER_FOR_DELETE_TEST).build();
         when(volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST)).thenReturn(Optional.of(volunteerInfo));
-        Optional<VolunteerInfo> volunteer = volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST);
+        Optional<Volunteer> volunteer = volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST);
         assertThat(volunteer).isNotEmpty();
 
         volunteerService.delete(Base.USER_FOR_DELETE_TEST);
 
         when(volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST)).thenReturn(Optional.empty());
-        Optional<VolunteerInfo> notExistsVolunteer = volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST);
+        Optional<Volunteer> notExistsVolunteer = volunteerRepository.findByName(Base.USER_FOR_DELETE_TEST);
         assertThat(notExistsVolunteer).isEmpty();
     }
 
@@ -103,11 +103,11 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
     public void updateTest_success() {
         UUID uuid = UUID.randomUUID();
         when(volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE))
-                .thenReturn(Optional.of(VolunteerInfo.builder().id(uuid).firstName("Пётр").lastName("Васюков").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
+                .thenReturn(Optional.of(Volunteer.builder().id(uuid).firstName("Пётр").lastName("Васюков").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
         when(volunteerRepository.findById(any(UUID.class)))
-                .thenReturn(Optional.of(VolunteerInfo.builder().firstName("Пётр").lastName("Васюткин").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
+                .thenReturn(Optional.of(Volunteer.builder().firstName("Пётр").lastName("Васюткин").createDate(LocalDateTime.of(2026, 9, 6, 12, 12)).build()));
         when(volunteerRepository.update(any(), any(UpdateVolunteerRequest.class))).thenReturn(uuid);
-        Optional<VolunteerInfo> volunteer = volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE);
+        Optional<Volunteer> volunteer = volunteerRepository.findByName(Base.USERNAME_FOR_UPDATE);
         assertEquals("Васюков", volunteer.get().getLastName());
 
         UpdateVolunteerRequest updateRequest = UpdateVolunteerRequest.builder().lastName("Васюткин").build();
@@ -125,9 +125,9 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
 
     @Test
     public void getById_success() {
-        VolunteerInfo exampleVolunteer = VolunteerInfo.builder().firstName("Кирилл").userId("Kirill01").build();
+        Volunteer exampleVolunteer = Volunteer.builder().firstName("Кирилл").userId("Kirill01").build();
         when(volunteerRepository.findByName(Base.USERNAME)).thenReturn(Optional.of(exampleVolunteer));
-        Optional<VolunteerInfo> volunteer = volunteerRepository.findByName(Base.USERNAME);
+        Optional<Volunteer> volunteer = volunteerRepository.findByName(Base.USERNAME);
 
         when(volunteerRepository.findByName("Kirill01")).thenReturn(Optional.of(exampleVolunteer));
         VolunteerInfoDto volunteer2 = volunteerService.get(volunteer.get().getUserId());
@@ -139,7 +139,7 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
         VolunteerListRequest request = VolunteerListRequest.builder().city("Moscow").status(STATUS.AVAILABLE).build();
 
         when(volunteerRepository.get(request))
-                .thenReturn(List.of(VolunteerInfo.builder().firstName("FIRST").build()));
+                .thenReturn(List.of(Volunteer.builder().firstName("FIRST").build()));
 
         VolunteerInfosResponse response = volunteerService.get(request);
 
@@ -152,7 +152,7 @@ public class VolunteerServiceTest extends BaseIntegrationTest {
         VolunteerListRequest request = VolunteerListRequest.builder().build();
 
         when(volunteerRepository.get(request))
-                .thenReturn(List.of(VolunteerInfo.builder().firstName("FIRST").build()));
+                .thenReturn(List.of(Volunteer.builder().firstName("FIRST").build()));
 
         VolunteerInfosResponse response = volunteerService.get(request);
 

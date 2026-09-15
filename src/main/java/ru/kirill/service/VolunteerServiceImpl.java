@@ -1,47 +1,48 @@
 package ru.kirill.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
-import ru.kirill.storage.VolunteerInfo;
-import ru.kirill.storage.VolunteerRepository;
-
+import ru.kirill.storage.Volunteer;
+import ru.kirill.storage.VolunteerRep;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Service
 public class VolunteerServiceImpl implements VolunteerService {
-    private final VolunteerRepository volunteerRepository;
+    private final VolunteerRep volunteerRepository;
     private final VolunteerMapper mapper;
 
-    public VolunteerServiceImpl(VolunteerRepository volunteerRepository, VolunteerMapper mapper) {
+    public VolunteerServiceImpl(VolunteerRep volunteerRepository, VolunteerMapper mapper) {
         this.volunteerRepository = volunteerRepository;
         this.mapper = mapper;
     }
 
     @Override
     public VolunteerInfoDto create(CreateVolunteerRequest request, String userId) {
-        VolunteerInfo volunteerInfo = mapper.toDomain(request).toBuilder()
+        Volunteer volunteer = mapper.toDomain(request).toBuilder()
                 .userId(userId)
                 .build();
-//        try {
-        VolunteerInfo volunteerI = volunteerRepository.create(volunteerInfo);
-        return mapper.toDto(volunteerI);
-//        } catch (DataIntegrityViolationException e) {
-//            String errorText = String.format("Item with this userId %s already exists", userId);
-//            log.error(errorText);
-//            throw new VolunteerServiceException(errorText, HttpStatus.CONFLICT)
-//        }
+        try {
+        Volunteer savedVolunteer = volunteerRepository.save(volunteer);
+        return mapper.toDto(savedVolunteer);
+        } catch (DataIntegrityViolationException e) {
+            String errorText = String.format("Item with this userId %s already exists", userId);
+            log.error(errorText);
+            throw new VolunteerServiceException(errorText, HttpStatus.CONFLICT);
+        }
     }
 
     @Override
     public VolunteerInfoDto get(String username) {
-        return volunteerRepository.findByName(username)
+        return volunteerRepository.findByUserId(username)
+                .stream()
                 .map(mapper::toDto)
+                .findFirst()
                 .orElseThrow(() -> {
                             String msg = String.format("Volunteer with name = %s not found", username);
                             return new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
@@ -51,7 +52,7 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public void delete(String username) {
-        volunteerRepository.delete(username);
+        volunteerRepository.deleteByUserId(username);
     }
 
     @Override
@@ -62,12 +63,12 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public void proveAction(ProveVolunteer prove, String userId) {
-
+        //todo add another service
     }
 
     @Override
     public VolunteerInfosResponse get(VolunteerListRequest request) {
-        List<VolunteerInfo> volunteers = volunteerRepository.get(request);
+        List<Volunteer> volunteers = volunteerRepository.get(request);
         return new VolunteerInfosResponse(mapper.toDto(volunteers));
     }
 
@@ -76,7 +77,7 @@ public class VolunteerServiceImpl implements VolunteerService {
         return volunteerRepository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> {
-                            String msg = String.format("Volunteer with id = %d not found", id);
+                            String msg = String.format("Volunteer with id = %s not found", id);
                             return new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
                         }
                 );

@@ -1,4 +1,5 @@
 val mapstructVersion: String = "1.5.5.Final"
+val jpaModelGenVersion: String = "6.5.2.Final"
 
 plugins {
     id("java")
@@ -19,12 +20,15 @@ java {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    runtimeOnly("org.postgresql:postgresql")
     implementation("org.mapstruct:mapstruct:${mapstructVersion}")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.hibernate:hibernate-jpamodelgen:${jpaModelGenVersion}")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

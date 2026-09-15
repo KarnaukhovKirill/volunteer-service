@@ -5,7 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import ru.kirill.controller.dto.CreateVolunteerRequest;
 import ru.kirill.controller.dto.VolunteerInfoDto;
-import ru.kirill.storage.VolunteerInfo;
+import ru.kirill.storage.Volunteer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
 public interface VolunteerMapper {
 
     @Mapping(target = "id", ignore = true)
-    VolunteerInfoDto toDto(VolunteerInfo volunteerI);
+    VolunteerInfoDto toDto(Volunteer volunteerI);
 
-    List<VolunteerInfoDto> toDto(List<VolunteerInfo> volunteers);
+    List<VolunteerInfoDto> toDto(List<Volunteer> volunteers);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", constant = "AVAILABLE")
@@ -29,5 +29,6 @@ public interface VolunteerMapper {
     @Mapping(target = "firstName", source = "fio", qualifiedByName = "extractFirstName")
     @Mapping(target = "lastName", source = "fio", qualifiedByName = "extractLastName")
     @Mapping(target = "middleName", source = "fio", qualifiedByName = "extractMiddleName")
-    VolunteerInfo toDomain(CreateVolunteerRequest request);
+    @Mapping(target = "location", ignore = true)
+    Volunteer toDomain(CreateVolunteerRequest request);
 }
