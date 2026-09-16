@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
+import ru.kirill.storage.ContractRepository;
 import ru.kirill.storage.Volunteer;
 import ru.kirill.storage.VolunteerRep;
 import java.util.List;
@@ -16,10 +17,12 @@ import java.util.UUID;
 public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerRep volunteerRepository;
     private final VolunteerMapper mapper;
+    private final ContractRepository contractRepository;
 
-    public VolunteerServiceImpl(VolunteerRep volunteerRepository, VolunteerMapper mapper) {
+    public VolunteerServiceImpl(VolunteerRep volunteerRepository, VolunteerMapper mapper, ContractRepository contractRepository) {
         this.volunteerRepository = volunteerRepository;
         this.mapper = mapper;
+        this.contractRepository = contractRepository;
     }
 
     @Override
@@ -58,6 +61,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     @Override
     public VolunteerInfoDto update(String userId, UpdateVolunteerRequest request) {
         UUID id = volunteerRepository.update(userId, request);
+        contractRepository.update(id, request);
         return get(id);
     }
 
