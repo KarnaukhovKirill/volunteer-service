@@ -1,16 +1,16 @@
-package ru.kirill.service;
+package ru.kirill.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import ru.kirill.controller.dto.CreateVolunteerRequest;
 import ru.kirill.controller.dto.VolunteerInfoDto;
-import ru.kirill.storage.Volunteer;
+import ru.kirill.storage.entity.Volunteer;
+import ru.kirill.utils.FioParser;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-//todo do mapping
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR,
         imports = LocalDateTime.class, uses = FioParser.class)
 public interface VolunteerMapper {

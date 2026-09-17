@@ -1,4 +1,4 @@
-package ru.kirill.service;
+package ru.kirill.utils;
 
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;

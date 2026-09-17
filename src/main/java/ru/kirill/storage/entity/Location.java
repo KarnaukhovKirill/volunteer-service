@@ -1,4 +1,4 @@
-package ru.kirill.storage;
+package ru.kirill.storage.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,31 +12,32 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "contract_info")
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "location")
 @Getter
 @Setter
 @Builder
-public class ContactInfo {
+public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "contact", nullable = false, unique = true)
-    private String contact;
-    @Column(name = "contract_type", nullable = false)
-    private CONTACTTYPE contactType;
+    @Column(name = "name", unique = true, nullable = false)
+    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_loc_id")
+    private Location parentLocation;
     @Column(name = "create_date", nullable = false)
     @CreationTimestamp
     @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
     private LocalDateTime createDate;
+    @Column(name = "location_kind", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LOCATIONKIND locationKind = LOCATIONKIND.PARENT;
     @Column(name = "update_date")
     @UpdateTimestamp
     @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
     private LocalDateTime updateDate;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private Volunteer volunteerId;
 
     /**
      * Переопределяем equals и hashCode
@@ -46,7 +47,7 @@ public class ContactInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getEffectiveClass(this) != getEffectiveClass(o)) return false;
-        return getId() != null && getId().equals(((ContactInfo) o).getId());
+        return getId() != null && getId().equals(((Location) o).getId());
     }
 
     @Override
@@ -57,5 +58,9 @@ public class ContactInfo {
     private static Class<?> getEffectiveClass(Object o) {
         return o instanceof HibernateProxy ?
                 ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    }
+
+    public enum LOCATIONKIND {
+        PARENT, CHILD
     }
 }

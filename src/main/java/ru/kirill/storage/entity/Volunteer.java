@@ -1,4 +1,4 @@
-package ru.kirill.storage;
+package ru.kirill.storage.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -2,6 +2,7 @@ package ru.kirill.controller.internal;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.kirill.controller.dto.CONTACTTYPE;
 import ru.kirill.controller.dto.ContactsVolunteerResponse;
 import ru.kirill.controller.dto.ContactInfoDto;
 
@@ -14,6 +15,6 @@ public class InternalVolunteerController {
 
     @PostMapping("/list")
     public ContactsVolunteerResponse list(@RequestBody List<Long> ids) {
-        return new ContactsVolunteerResponse(List.of(ContactInfoDto.builder().contactType(ContactInfoDto.CONTACTTYPE.EMAIL).contact("email@gmail.com").volunteerId(1).build()));
+        return new ContactsVolunteerResponse(List.of(ContactInfoDto.builder().contactType(CONTACTTYPE.EMAIL).contact("email@gmail.com").volunteerId(1).build()));
     }
 }

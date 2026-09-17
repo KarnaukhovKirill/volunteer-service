@@ -1,8 +1,11 @@
-package ru.kirill.storage;
+package ru.kirill.storage.updaters;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.kirill.controller.dto.UpdateVolunteerRequest;
+import ru.kirill.storage.entity.Location;
+import ru.kirill.storage.LocationRep;
+import ru.kirill.storage.entity.Volunteer_;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +30,7 @@ public class VolunteerUpdaters {
                     .stream()
                     .findFirst()
                     .orElse(
-                            locationRep.save(Location.builder().name(name).locationKind(LOCATIONKIND.PARENT).createDate(LocalDateTime.now()).build())
+                            locationRep.save(Location.builder().name(name).locationKind(Location.LOCATIONKIND.PARENT).createDate(LocalDateTime.now()).build())
                     );
         });
     }

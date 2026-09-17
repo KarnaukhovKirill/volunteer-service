@@ -1,9 +1,10 @@
-package ru.kirill.storage;
+package ru.kirill.storage.updaters;
 
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.AllArgsConstructor;
 import ru.kirill.controller.dto.UpdateVolunteerRequest;
+import ru.kirill.storage.entity.Volunteer;
 
 import java.util.function.Function;
 

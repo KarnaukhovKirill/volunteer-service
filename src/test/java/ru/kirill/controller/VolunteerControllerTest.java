@@ -92,9 +92,6 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                     assertThat(response.getId()).isGreaterThanOrEqualTo(0);
                 });
     }
-
-    //todo create test when db dont have user (catch exception)
-
     @Test
     public void testDeleteVolunteer_response_success() {
         webTestClient.delete()

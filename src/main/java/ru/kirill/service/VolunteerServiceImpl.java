@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
+import ru.kirill.mapper.VolunteerMapper;
 import ru.kirill.storage.ContractRepository;
-import ru.kirill.storage.Volunteer;
-import ru.kirill.storage.VolunteerRep;
+import ru.kirill.storage.entity.Volunteer;
+import ru.kirill.storage.volunteer.VolunteerRep;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +33,8 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .userId(userId)
                 .build();
         try {
-        Volunteer savedVolunteer = volunteerRepository.save(volunteer);
-        return mapper.toDto(savedVolunteer);
+            Volunteer savedVolunteer = volunteerRepository.save(volunteer);
+            return mapper.toDto(savedVolunteer);
         } catch (DataIntegrityViolationException e) {
             String errorText = String.format("Item with this userId %s already exists", userId);
             log.error(errorText);
@@ -60,9 +62,14 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     public VolunteerInfoDto update(String userId, UpdateVolunteerRequest request) {
-        UUID id = volunteerRepository.update(userId, request);
-        contractRepository.update(id, request);
-        return get(id);
+        int id = volunteerRepository.update(userId, request);
+        if (id == 0) {
+            var msg = String.format("Volunteer with userId = %s not found", userId);
+            throw new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
+        }
+        UUID volunteereUUID = volunteerRepository.findByUserId(userId).getFirst().getId();
+        contractRepository.update(volunteereUUID, request);
+        return get(volunteereUUID);
     }
 
     @Override
