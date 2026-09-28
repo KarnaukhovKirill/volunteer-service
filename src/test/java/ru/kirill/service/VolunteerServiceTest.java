@@ -11,7 +11,7 @@ import ru.kirill.Base;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.mapper.VolunteerMapperImpl;
-import ru.kirill.storage.ContractRepository;
+import ru.kirill.storage.contract.ContractRepository;
 import ru.kirill.storage.volunteer.VolunteerRep;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.utils.FioParser;

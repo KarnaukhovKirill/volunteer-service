@@ -25,6 +25,7 @@ public class ContactInfo {
     private UUID id;
     @Column(name = "contact", nullable = false, unique = true)
     private String contact;
+    @Enumerated(value = EnumType.STRING)
     @Column(name = "contract_type", nullable = false)
     private CONTACTTYPE contactType;
     @Column(name = "create_date", nullable = false)
@@ -36,7 +37,7 @@ public class ContactInfo {
     @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
     private LocalDateTime updateDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "volunteer_id")
     private Volunteer volunteerId;
 
     /**

@@ -1,4 +1,4 @@
-package ru.kirill.storage;
+package ru.kirill.storage.contract;
 
 import org.springframework.stereotype.Repository;
 import ru.kirill.controller.dto.CONTACTTYPE;

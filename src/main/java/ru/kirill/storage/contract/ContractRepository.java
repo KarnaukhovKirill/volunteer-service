@@ -1,4 +1,4 @@
-package ru.kirill.storage;
+package ru.kirill.storage.contract;
 
 import ru.kirill.controller.dto.UpdateVolunteerRequest;
 

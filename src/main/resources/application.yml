@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      # говорим hibernate, что необходимо провалидировать соответствие схемы БД и JPA модели
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # говорим hibernate, чтобы выводимые в логи sql запросы были отфрматированы для удобства чтения
+        format_sql: true
+        # говорим hibernate показывать sql запросы в логах (для отладки и тестирования)
+        show_sql: true

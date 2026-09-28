@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.mapper.VolunteerMapper;
-import ru.kirill.storage.ContractRepository;
+import ru.kirill.storage.contract.ContractRepository;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.storage.volunteer.VolunteerRep;
 
