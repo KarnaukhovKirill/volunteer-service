@@ -11,7 +11,7 @@ import ru.kirill.Base;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.mapper.VolunteerMapperImpl;
-import ru.kirill.storage.contract.ContractRepository;
+import ru.kirill.storage.contact.ContactRepository;
 import ru.kirill.storage.volunteer.VolunteerRep;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.utils.FioParser;
@@ -34,7 +34,7 @@ public class VolunteerServiceTest {
     @Mock
     private VolunteerRep volunteerRepository;
     @Mock
-    private ContractRepository contractRepository;
+    private ContactRepository contactRepository;
 
     private VolunteerService volunteerService;
 
@@ -42,7 +42,7 @@ public class VolunteerServiceTest {
     public void setUp() {
         VolunteerMapperImpl mapper = new VolunteerMapperImpl();
         ReflectionTestUtils.setField(mapper, "fioParser", new FioParser());
-        volunteerService = new VolunteerServiceImpl(volunteerRepository, mapper, contractRepository);
+        volunteerService = new VolunteerServiceImpl(volunteerRepository, mapper, contactRepository);
     }
 
     @Test

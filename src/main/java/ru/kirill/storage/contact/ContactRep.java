@@ -1,4 +1,4 @@
-package ru.kirill.storage.contract;
+package ru.kirill.storage.contact;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.kirill.storage.entity.ContactInfo;

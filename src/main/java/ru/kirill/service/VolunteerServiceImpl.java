@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.mapper.VolunteerMapper;
-import ru.kirill.storage.contract.ContractRepository;
+import ru.kirill.storage.contact.ContactRepository;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.storage.volunteer.VolunteerRep;
 
@@ -19,12 +19,12 @@ import java.util.UUID;
 public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerRep volunteerRepository;
     private final VolunteerMapper mapper;
-    private final ContractRepository contractRepository;
+    private final ContactRepository contactRepository;
 
-    public VolunteerServiceImpl(VolunteerRep volunteerRepository, VolunteerMapper mapper, ContractRepository contractRepository) {
+    public VolunteerServiceImpl(VolunteerRep volunteerRepository, VolunteerMapper mapper, ContactRepository contactRepository) {
         this.volunteerRepository = volunteerRepository;
         this.mapper = mapper;
-        this.contractRepository = contractRepository;
+        this.contactRepository = contactRepository;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class VolunteerServiceImpl implements VolunteerService {
             throw new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
         }
         UUID volunteereUUID = volunteerRepository.findByUserId(userId).getFirst().getId();
-        contractRepository.update(volunteereUUID, request);
+        contactRepository.update(volunteereUUID, request);
         return get(volunteereUUID);
     }
 

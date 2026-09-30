@@ -1,6 +1,7 @@
 package ru.kirill.storage.volunteer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kirill.storage.entity.Volunteer;
 
 import java.util.List;
@@ -10,5 +11,6 @@ import java.util.UUID;
 public interface VolunteerRep extends JpaRepository<Volunteer, UUID>, VolunteerRepository {
     List<Volunteer> findByUserId(String userId);
 
+    @Transactional
     void deleteByUserId(String userId);
 }

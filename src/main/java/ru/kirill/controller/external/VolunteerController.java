@@ -1,7 +1,6 @@
 package ru.kirill.controller.external;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +55,7 @@ public class VolunteerController {
     }
 
     @GetMapping("/{id}")
-    public VolunteerInfoDto get(@PathVariable("id") @Positive(message = "id должен быть > 0.") UUID id) {
+    public VolunteerInfoDto get(@PathVariable("id") UUID id) {
         log.info("input id {}", id);
         return volunteerService.get(id);
     }

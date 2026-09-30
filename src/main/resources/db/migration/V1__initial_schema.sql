@@ -26,14 +26,15 @@ create table volunteer
 
 create index idx_volunteer_location_id on volunteer (location_id);
 
-create table contract_info
+create table contact_info
 (
-    id            uuid primary key      default gen_random_uuid(),
-    contact       varchar(255) not null unique,
-    contract_type varchar(50)  not null check (contract_type in ('EMAIL', 'PHONE')),
-    volunteer_id  uuid references volunteer (id),
-    create_date   timestamp(6) not null default now(),
-    update_date   timestamp(6)
+    id           uuid primary key      default gen_random_uuid(),
+    contact      varchar(255) not null unique,
+    contact_type varchar(50)  not null check (contact_type in ('EMAIL', 'PHONE')),
+    -- при удалении волонтёра удаляем и его контакты
+    volunteer_id uuid references volunteer (id) on delete cascade,
+    create_date  timestamp(6) not null default now(),
+    update_date  timestamp(6)
 );
 
-create index idx_contract_info_volunteer_id on contract_info (volunteer_id);
+create index idx_contact_info_volunteer_id on contact_info (volunteer_id);

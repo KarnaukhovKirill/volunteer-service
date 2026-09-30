@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "contract_info")
+@Table(name = "contact_info")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -26,7 +26,7 @@ public class ContactInfo {
     @Column(name = "contact", nullable = false, unique = true)
     private String contact;
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "contract_type", nullable = false)
+    @Column(name = "contact_type", nullable = false)
     private CONTACTTYPE contactType;
     @Column(name = "create_date", nullable = false)
     @CreationTimestamp

@@ -1,43 +1,51 @@
 package ru.kirill.storage.searchers;
 
+import jakarta.persistence.criteria.Expression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import ru.kirill.controller.dto.STATUS;
 import ru.kirill.controller.dto.VolunteerListRequest;
-import ru.kirill.storage.LocationRep;
-import ru.kirill.storage.entity.Location;
+import ru.kirill.storage.entity.Location_;
 import ru.kirill.storage.entity.Volunteer_;
-
-import java.util.UUID;
 
 @Configuration
 public class VolunteerSearcherers {
-    private static final UUID NOT_EXISTING_LOCATION_ID = new UUID(0, 0);
+    private static final char LIKE_ESCAPE = '\\';
 
-    private final LocationRep locationRep;
-
-    public VolunteerSearcherers(LocationRep locationRep) {
-        this.locationRep = locationRep;
-    }
-
+    /**
+     * Только city: локации с названием city или city(любой район), без учёта регистра.
+     * city и restrict: точное совпадение с city(restrict).
+     */
     @Bean
-    public VolunteerSearcherer<Location> searchByLocation() {
-        return new VolunteerSearcherer<>(Volunteer_.location, request -> {
-            if (!StringUtils.hasText(request.getCity()) || !StringUtils.hasText(request.getRestrict())) {
-                return null;
-            }
-            String name = request.getCity() + "(" + request.getRestrict() + ")";
-            // если локации нет, то и волонтёров в ней нет: подставляем несуществующий id, чтобы запрос вернул пустой список
-            return locationRep.findByName(name)
-                    .stream()
-                    .findFirst()
-                    .orElseGet(() -> Location.builder().id(NOT_EXISTING_LOCATION_ID).build());
-        });
+    public VolunteerSearcherer<VolunteerListRequest> searchByLocation() {
+        return new VolunteerSearcherer<>(
+                request -> StringUtils.hasText(request.getCity()) ? request : null,
+                (root, criteriaBuilder, request) -> {
+                    Expression<String> name = root.join(Volunteer_.location).get(Location_.name);
+                    if (StringUtils.hasText(request.getRestrict())) {
+                        return criteriaBuilder.equal(name, request.getCity() + "(" + request.getRestrict() + ")");
+                    }
+                    String city = request.getCity().toLowerCase();
+                    Expression<String> lowerName = criteriaBuilder.lower(name);
+                    return criteriaBuilder.or(
+                            criteriaBuilder.equal(lowerName, city),
+                            criteriaBuilder.like(lowerName, escapeLike(city) + "(%", LIKE_ESCAPE)
+                    );
+                });
     }
 
     @Bean
     public VolunteerSearcherer<STATUS> searchByStatus() {
         return new VolunteerSearcherer<>(Volunteer_.status, VolunteerListRequest::getStatus);
+    }
+
+    /**
+     * экранируем спецсимволы like, чтобы % и _ из запроса искались как обычные символы
+     */
+    private static String escapeLike(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 }

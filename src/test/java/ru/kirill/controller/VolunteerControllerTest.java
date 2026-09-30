@@ -24,7 +24,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     public void testCreateVolunteer_response_is201() {
         webTestClient.post()
                 .uri(BASE_URL + "register/me")
-                .header(VolunteerController.USER_HEADER, Base.USERNAME)
+                .header(VolunteerController.USER_HEADER, Base.NEW_USERNAME)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(CreateVolunteerRequest.builder()
@@ -119,6 +119,20 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     }
 
     @Test
+    public void testPatchVolunteer_onlyLastName_response_success() {
+        webTestClient.patch()
+                .uri(BASE_URL + "me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(UpdateVolunteerRequest.builder().lastName("Petrov").build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VolunteerInfoDto.class)
+                .value(response -> assertThat(response.getLastName()).isEqualTo("Petrov"));
+    }
+
+    @Test
     public void testPostListVolunteer_response_success() {
         webTestClient.post()
                 .uri(BASE_URL + "list")
@@ -138,7 +152,7 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     @Test
     public void testGetVolunteerById_response_success() {
         webTestClient.get()
-                .uri(BASE_URL + "1")
+                .uri(BASE_URL + Base.USERNAME_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()

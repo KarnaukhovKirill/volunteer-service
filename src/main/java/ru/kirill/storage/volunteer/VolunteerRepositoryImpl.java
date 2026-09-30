@@ -57,8 +57,6 @@ public class VolunteerRepositoryImpl implements VolunteerRepository {
         Root<Volunteer> root = criteriaUpdate.from(Volunteer.class);
 
         updaters.forEach(updater -> updater.setAttr(criteriaUpdate, request));
-        criteriaUpdate.set(Volunteer_.UPDATE_DATE, LocalDateTime.now());
-
         criteriaUpdate.where(criteriaBuilder.equal(root.get(Volunteer_.userId), userId));
 
         return entityManager.createQuery(criteriaUpdate).executeUpdate();
