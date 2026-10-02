@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import ru.kirill.controller.dto.STATUS;
 import ru.kirill.controller.dto.VolunteerListRequest;
+import ru.kirill.storage.entity.Location;
 import ru.kirill.storage.entity.Location_;
 import ru.kirill.storage.entity.Volunteer_;
 
@@ -24,7 +25,7 @@ public class VolunteerSearcherers {
                 (root, criteriaBuilder, request) -> {
                     Expression<String> name = root.join(Volunteer_.location).get(Location_.name);
                     if (StringUtils.hasText(request.getRestrict())) {
-                        return criteriaBuilder.equal(name, request.getCity() + "(" + request.getRestrict() + ")");
+                        return criteriaBuilder.equal(name, Location.buildName(request.getCity(), request.getRestrict()));
                     }
                     String city = request.getCity().toLowerCase();
                     Expression<String> lowerName = criteriaBuilder.lower(name);

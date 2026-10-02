@@ -3,15 +3,18 @@ package ru.kirill.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.kirill.Base;
 import ru.kirill.controller.dto.*;
 import ru.kirill.controller.exception.VolunteerServiceException;
 import ru.kirill.mapper.VolunteerMapperImpl;
-import ru.kirill.storage.contact.ContactRepository;
+import ru.kirill.storage.location.LocationRep;
+import ru.kirill.storage.entity.Location;
 import ru.kirill.storage.volunteer.VolunteerRep;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.utils.FioParser;
@@ -25,7 +28,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +39,9 @@ public class VolunteerServiceTest {
     @Mock
     private VolunteerRep volunteerRepository;
     @Mock
-    private ContactRepository contactRepository;
+    private ContactService contactService;
+    @Mock
+    private LocationRep locationRep;
 
     private VolunteerService volunteerService;
 
@@ -42,7 +49,7 @@ public class VolunteerServiceTest {
     public void setUp() {
         VolunteerMapperImpl mapper = new VolunteerMapperImpl();
         ReflectionTestUtils.setField(mapper, "fioParser", new FioParser());
-        volunteerService = new VolunteerServiceImpl(volunteerRepository, mapper, contactRepository);
+        volunteerService = new VolunteerServiceImpl(volunteerRepository, mapper, contactService, locationRep);
     }
 
     @Test
@@ -63,7 +70,9 @@ public class VolunteerServiceTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
-        when(volunteerRepository.save(any(Volunteer.class)))
+        Location location = Location.builder().name("Moscow").build();
+        when(locationRep.findOrCreate("Moscow")).thenReturn(location);
+        when(volunteerRepository.saveAndFlush(any(Volunteer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         VolunteerInfoDto volunteerInfoDto = volunteerService.create(request, Base.STEPANOV01);
         assertThat(volunteerInfoDto.getId()).isGreaterThanOrEqualTo(0);
@@ -72,6 +81,53 @@ public class VolunteerServiceTest {
         assertThat(volunteerInfoDto.getLastName()).isEqualTo("Степанов");
         assertThat(volunteerInfoDto.getMiddleName()).isEqualTo("Сергеевич");
         assertThat(volunteerInfoDto.getUserId()).isEqualTo(Base.STEPANOV01);
+
+        ArgumentCaptor<Volunteer> saved = ArgumentCaptor.forClass(Volunteer.class);
+        verify(volunteerRepository).saveAndFlush(saved.capture());
+        assertThat(saved.getValue().getLocation()).isSameAs(location);
+        verify(contactService).create(saved.getValue(), "yaVladimir@mail.com", "79061233564");
+    }
+
+    @Test
+    public void createTest_withRestrict_locationWithRestrict() {
+        CreateVolunteerRequest request = CreateVolunteerRequest.builder()
+                .fio("Степанов Владимир Сергеевич")
+                .phoneNumber("79061233564")
+                .gender(GENDER.MALE)
+                .email("yaVladimir@mail.com")
+                .birthday(LocalDate.of(1999, 2, 20))
+                .city("Moscow")
+                .restrict("Khimky")
+                .build();
+        when(volunteerRepository.saveAndFlush(any(Volunteer.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        volunteerService.create(request, Base.STEPANOV01);
+
+        verify(locationRep).findOrCreate("Moscow(Khimky)");
+    }
+
+    @Test
+    public void createTest_contactConflict() {
+        CreateVolunteerRequest request = CreateVolunteerRequest.builder()
+                .fio("Степанов Владимир Сергеевич")
+                .phoneNumber("79061233564")
+                .gender(GENDER.MALE)
+                .email("yaVladimir@mail.com")
+                .birthday(LocalDate.of(1999, 2, 20))
+                .city("Moscow")
+                .build();
+        when(volunteerRepository.saveAndFlush(any(Volunteer.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new DataIntegrityViolationException("constraint")).when(volunteerRepository).flush();
+
+        assertEquals(
+                HttpStatus.CONFLICT,
+                assertThrows(
+                        VolunteerServiceException.class,
+                        () -> volunteerService.create(request, Base.STEPANOV01)
+                ).getStatus()
+        );
     }
 
     @Test
@@ -84,11 +140,15 @@ public class VolunteerServiceTest {
                 .birthday(LocalDate.of(1999, 2, 20))
                 .city("Moscow")
                 .build();
-        when(volunteerRepository.save(any(Volunteer.class))).thenThrow(new DataIntegrityViolationException("constraint"));
-        assertThrows(
-                VolunteerServiceException.class,
-                () -> volunteerService.create(request, Base.STEPANOV01)
+        when(volunteerRepository.saveAndFlush(any(Volunteer.class))).thenThrow(new DataIntegrityViolationException("constraint"));
+        assertEquals(
+                HttpStatus.CONFLICT,
+                assertThrows(
+                        VolunteerServiceException.class,
+                        () -> volunteerService.create(request, Base.STEPANOV01)
+                ).getStatus()
         );
+        verifyNoInteractions(contactService);
     }
 
     @Test

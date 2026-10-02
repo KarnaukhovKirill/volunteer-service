@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import ru.kirill.controller.dto.UpdateVolunteerRequest;
 import ru.kirill.storage.entity.Location;
-import ru.kirill.storage.LocationRep;
+import ru.kirill.storage.location.LocationRep;
 import ru.kirill.storage.entity.Volunteer_;
 
 import java.time.LocalDateTime;
@@ -29,14 +29,7 @@ public class VolunteerUpdaters {
             if (!StringUtils.hasText(request.getCity()) || !StringUtils.hasText(request.getRestrict())) {
                 return null;
             }
-            String name = request.getCity() + "(" + request.getRestrict() + ")";
-            // saveAndFlush: bulk update не флашит таблицу location, без этого получим нарушение FK
-            return locationRep.findByName(name)
-                    .stream()
-                    .findFirst()
-                    .orElseGet(() -> locationRep.saveAndFlush(
-                            Location.builder().name(name).locationKind(Location.LOCATIONKIND.PARENT).createDate(LocalDateTime.now()).build()
-                    ));
+            return locationRep.findOrCreate(Location.buildName(request.getCity(), request.getRestrict()));
         });
     }
 

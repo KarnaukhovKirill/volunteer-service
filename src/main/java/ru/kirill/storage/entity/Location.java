@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 import ru.kirill.utils.DateUtils;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,13 @@ public class Location {
     @UpdateTimestamp
     @DateTimeFormat(pattern = DateUtils.DATE_FORMAT)
     private LocalDateTime updateDate;
+
+    /**
+     * Название локации: city(restrict) или просто city, если район не задан
+     */
+    public static String buildName(String city, String restrict) {
+        return StringUtils.hasText(restrict) ? city + "(" + restrict + ")" : city;
+    }
 
     /**
      * Переопределяем equals и hashCode

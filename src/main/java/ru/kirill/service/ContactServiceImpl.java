@@ -1,9 +1,10 @@
-package ru.kirill.storage.contact;
+package ru.kirill.service;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kirill.controller.dto.CONTACTTYPE;
 import ru.kirill.controller.dto.UpdateVolunteerRequest;
+import ru.kirill.storage.contact.ContactRep;
 import ru.kirill.storage.entity.ContactInfo;
 import ru.kirill.storage.entity.Volunteer;
 import ru.kirill.storage.volunteer.VolunteerRep;
@@ -12,20 +13,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Repository
-public class ContactRepositoryImpl implements ContactRepository {
+@Service
+public class ContactServiceImpl implements ContactService {
     private final ContactRep contactRep;
     private final VolunteerRep volunteerRepository;
 
-    public ContactRepositoryImpl(ContactRep contactRep, VolunteerRep volunteerRepository) {
+    public ContactServiceImpl(ContactRep contactRep, VolunteerRep volunteerRepository) {
         this.contactRep = contactRep;
         this.volunteerRepository = volunteerRepository;
     }
 
-    /**
-     * Обновляет email и телефон независимо друг от друга: не переданный в запросе контакт не меняется.
-     * Транзакция нужна, чтобы изменения найденных контактов сохранились в БД.
-     */
+    @Override
+    public void create(Volunteer volunteer, String email, String phoneNumber) {
+        contactRep.save(newContact(volunteer, CONTACTTYPE.EMAIL, email));
+        contactRep.save(newContact(volunteer, CONTACTTYPE.PHONE, phoneNumber));
+    }
+
     @Transactional
     @Override
     public void update(UUID userId, UpdateVolunteerRequest request) {
@@ -44,14 +47,16 @@ public class ContactRepositoryImpl implements ContactRepository {
                 .findFirst()
                 .ifPresentOrElse(
                         info -> info.setContact(contact),
-                        () -> contactRep.save(
-                                ContactInfo.builder()
-                                        .contact(contact)
-                                        .contactType(type)
-                                        .createDate(LocalDateTime.now())
-                                        .volunteerId(volunteer)
-                                        .build()
-                        )
+                        () -> contactRep.save(newContact(volunteer, type, contact))
                 );
+    }
+
+    private static ContactInfo newContact(Volunteer volunteer, CONTACTTYPE type, String contact) {
+        return ContactInfo.builder()
+                .contact(contact)
+                .contactType(type)
+                .createDate(LocalDateTime.now())
+                .volunteerId(volunteer)
+                .build();
     }
 }
