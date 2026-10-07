@@ -1,6 +1,5 @@
 package ru.kirill.controller;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,8 +29,6 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     public static final String BASE_URL = "/api/v1/volunteer/";
     @Autowired
     private WebTestClient webTestClient;
-    @Autowired
-    private EntityManager em;
 
     @Test
     public void testCreateVolunteer_response_is201() {
@@ -171,6 +168,19 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody(VolunteerInfoDto.class)
                 .value(response -> assertThat(response.getLastName()).isEqualTo("Petrov"));
+    }
+
+    @Test
+    public void testPatchVolunteer_cityWithoutRestrict_response_success() {
+        webTestClient.patch()
+                .uri(BASE_URL + "me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(UpdateVolunteerRequest.builder().city("Kazan").build())
+                .exchange()
+                .expectStatus().isOk();
+
+        assertThat(getLocationName(Base.USERNAME)).isEqualTo("Kazan");
     }
 
     @Test
@@ -468,15 +478,6 @@ class VolunteerControllerTest extends BaseIntegrationTest {
                 .getResultList()
                 .stream()
                 .collect(Collectors.toMap(ContactInfo::getContactType, ContactInfo::getContact));
-    }
-
-    /**
-     * @return название локации волонтёра или null, если локация не задана
-     */
-    private String getLocationName(String userId) {
-        return em.createQuery("select l.name from Volunteer v left join v.location l where v.userId = ?1", String.class)
-                .setParameter(1, userId)
-                .getSingleResult();
     }
 
     /**

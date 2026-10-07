@@ -1,4 +1,17 @@
+server:
+  port: 9090
+  tomcat:
+    connection-timeout: 3s
+    keep-alive-timeout: 20s
+
 spring:
+  application:
+    name: volunteer-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
   jpa:
     open-in-view: false
     hibernate:

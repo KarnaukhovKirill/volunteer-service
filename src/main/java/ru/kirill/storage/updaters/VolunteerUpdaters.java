@@ -23,10 +23,13 @@ public class VolunteerUpdaters {
         return new VolunteerUpdater<>(Volunteer_.lastName, UpdateVolunteerRequest::getLastName);
     }
 
+    /**
+     * city без restrict: локация — просто город. restrict без city игнорируется.
+     */
     @Bean
     public VolunteerUpdater<Location> locationVolunteerUpdater() {
         return new VolunteerUpdater<>(Volunteer_.location, request -> {
-            if (!StringUtils.hasText(request.getCity()) || !StringUtils.hasText(request.getRestrict())) {
+            if (!StringUtils.hasText(request.getCity())) {
                 return null;
             }
             return locationRep.findOrCreate(Location.buildName(request.getCity(), request.getRestrict()));
