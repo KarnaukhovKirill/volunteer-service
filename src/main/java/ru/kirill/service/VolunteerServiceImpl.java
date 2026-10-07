@@ -79,6 +79,11 @@ public class VolunteerServiceImpl implements VolunteerService {
         volunteerRepository.deleteByUserId(username);
     }
 
+    /**
+     * Обновляет волонтёра и контакты в одной транзакции, чтобы при конфликте контактов откатился и UPDATE волонтёра.
+     * flush нужен, чтобы нарушение unique всплыло внутри try, а не при коммите.
+     */
+    @Transactional
     @Override
     public VolunteerInfoDto update(String userId, UpdateVolunteerRequest request) {
         int id = volunteerRepository.update(userId, request);
@@ -86,8 +91,21 @@ public class VolunteerServiceImpl implements VolunteerService {
             var msg = String.format("Volunteer with userId = %s not found", userId);
             throw new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
         }
-        UUID volunteereUUID = volunteerRepository.findByUserId(userId).getFirst().getId();
-        contactService.update(volunteereUUID, request);
+        UUID volunteereUUID = volunteerRepository.findByUserId(userId).stream()
+                .findFirst()
+                .map(Volunteer::getId)
+                .orElseThrow(() -> {
+                    var msg = String.format("Volunteer with userId = %s not found", userId);
+                    return new VolunteerServiceException(msg, HttpStatus.NOT_FOUND);
+                });
+        try {
+            contactService.update(volunteereUUID, request);
+            volunteerRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            String errorText = "Email or phone number is already used by another volunteer";
+            log.error(errorText);
+            throw new VolunteerServiceException(errorText, HttpStatus.CONFLICT);
+        }
         return get(volunteereUUID);
     }
 

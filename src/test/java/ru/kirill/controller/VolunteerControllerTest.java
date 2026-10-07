@@ -282,6 +282,32 @@ class VolunteerControllerTest extends BaseIntegrationTest {
     }
 
     @Test
+    public void testPatchVolunteer_emailUsedByAnotherVolunteer_response_is409_andRollback() {
+        webTestClient.post()
+                .uri(BASE_URL + "register/me")
+                .header(VolunteerController.USER_HEADER, Base.NEW_USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(withField(validCreateRequest(), "email", "taken@mail.com"))
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.patch()
+                .uri(BASE_URL + "me")
+                .header(VolunteerController.USER_HEADER, Base.USERNAME)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(UpdateVolunteerRequest.builder().lastName("Petrov").email("taken@mail.com").build())
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody(ProblemDetail.class)
+                .value(problemDetail ->
+                        assertThat(problemDetail.getDetail()).isEqualTo("Email or phone number is already used by another volunteer"));
+
+        assertThat(volunteerRepository.findByUserId(Base.USERNAME).getFirst().getLastName()).isEqualTo("Фамилия");
+        assertThat(getContacts(UUID.fromString(Base.USERNAME_ID)))
+                .isEqualTo(Map.of(CONTACTTYPE.EMAIL, "username@mail.com", CONTACTTYPE.PHONE, "79990000000"));
+    }
+
+    @Test
     public void testGetVolunteerWithoutXUserId_response_is400() {
         webTestClient.get()
                 .uri(BASE_URL + "/me")
