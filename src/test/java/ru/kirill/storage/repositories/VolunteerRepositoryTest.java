@@ -15,6 +15,7 @@ import ru.kirill.storage.updaters.VolunteerUpdaters;
 import ru.kirill.storage.volunteer.VolunteerRepositoryImpl;
 
 import java.util.Set;
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -153,6 +154,23 @@ public class VolunteerRepositoryTest extends BaseTests {
     }
 
     @Test
+    @org.junit.jupiter.api.parallel.ResourceLock("java.util.Locale.default")
+    public void getByCity_isIndependentOfJvmLocale() {
+        volunteerRepository.update("User001", UpdateVolunteerRequest.builder().city("ISTANBUL").build());
+        volunteerRepository.update("User002", UpdateVolunteerRequest.builder().city("ISTANBUL").restrict("Center").build());
+        assertEquals("istanbul", em.createNativeQuery("select lower('ISTANBUL')").getSingleResult(),
+                "Regression requires PostgreSQL to lowercase ASCII I to i");
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            assertEquals(Set.of("User001", "User002"),
+                    getUserIds(VolunteerListRequest.builder().city("ISTANBUL").build()));
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
     public void getByCityOnly() {
         VolunteerListRequest request = VolunteerListRequest.builder()
                 .city("moscow")
@@ -223,6 +241,19 @@ public class VolunteerRepositoryTest extends BaseTests {
         VolunteerListRequest request = VolunteerListRequest.builder().build();
 
         assertEquals(Set.of("User001", "User002", "User003", "User004", "User005", "Username"), getUserIds(request));
+    }
+
+    @Test
+    public void getByCityWithSpecialCharacters_matchesLiteralCityAndDistrictOnly() {
+        for (String city : new String[]{"Mos%", "Mos_", "Mos\\", "O'Brien", "Mos%_\\", "O'Brien%_\\"}) {
+            volunteerRepository.update("User001", UpdateVolunteerRequest.builder().city(city).build());
+            volunteerRepository.update("User002", UpdateVolunteerRequest.builder().city(city).restrict("Center").build());
+            volunteerRepository.update("User003", UpdateVolunteerRequest.builder().city("MosX").restrict("Center").build());
+            volunteerRepository.update("User004", UpdateVolunteerRequest.builder().city("Mos").restrict("Center").build());
+
+            assertEquals(Set.of("User001", "User002"),
+                    getUserIds(VolunteerListRequest.builder().city(city).build()), city);
+        }
     }
 
     @Test
