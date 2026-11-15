@@ -1,6 +1,7 @@
 package ru.kirill.storage.searchers;
 
 import jakarta.persistence.criteria.Expression;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -27,11 +28,13 @@ public class VolunteerSearcherers {
                     if (StringUtils.hasText(request.getRestrict())) {
                         return criteriaBuilder.equal(name, Location.buildName(request.getCity(), request.getRestrict()));
                     }
-                    String city = request.getCity().toLowerCase();
+                    String city = request.getCity();
+                    HibernateCriteriaBuilder hibernateBuilder = (HibernateCriteriaBuilder) criteriaBuilder;
                     Expression<String> lowerName = criteriaBuilder.lower(name);
                     return criteriaBuilder.or(
-                            criteriaBuilder.equal(lowerName, city),
-                            criteriaBuilder.like(lowerName, escapeLike(city) + "(%", LIKE_ESCAPE)
+                            criteriaBuilder.equal(lowerName, criteriaBuilder.lower(hibernateBuilder.value(city))),
+                            criteriaBuilder.like(lowerName,
+                                    criteriaBuilder.lower(hibernateBuilder.value(escapeLike(city) + "(%")), LIKE_ESCAPE)
                     );
                 });
     }
